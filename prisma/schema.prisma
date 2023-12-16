@@ -1,0 +1,66 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum MovementType {
+  INCOME
+  EXPENSE
+}
+
+enum MovementCategory {
+  FOOD
+  TRANSPORT
+  HEALTH
+  ENTERTAINMENT
+  SHOPPING
+  UTILITY
+  BILL
+  OTHER
+}
+
+model User {
+  id        Int        @id @default(autoincrement())
+  firstName String
+  lastName  String
+  email     String     @unique
+  balance   Balance?
+  movements Movement[]
+  tags      Tag[]
+}
+
+model Tag {
+  id          Int        @id @default(autoincrement())
+  description String
+  user        User       @relation(fields: [userId], references: [id])
+  userId      Int
+  movements   Movement[]
+}
+
+model Balance {
+  id     Int  @id @default(autoincrement())
+  value  Int
+  user   User @relation(fields: [userId], references: [id])
+  userId Int  @unique
+}
+
+model Movement {
+  id               Int              @id @default(autoincrement())
+  description      String?
+  movementType     MovementType
+  movementCategory MovementCategory
+  value            Int
+  user             User             @relation(fields: [userId], references: [id])
+  userId           Int
+  tagId            Int?
+  tag              Tag?             @relation(fields: [tagId], references: [id])
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+}
